@@ -1,0 +1,802 @@
+package java_miniproject;  
+import java.util.Map;
+
+public class AdminPanel {
+    // Reset the password for a user
+    public void resetPassword(User user, String newPassword) {
+        user.setPassword(newPassword);
+        System.out.println("Password reset for user: " + user.getUsername());
+    }
+
+    // Display a list of registered users
+    public void displayRegisteredUsers(Map<String, User> userDatabase) {
+        for (User user : userDatabase.values()) {
+            System.out.println("Username: " + user.getUsername() + ", Role: " + user.getRole());
+        }
+    }
+
+    // Handle technical issues or system maintenance
+    public void handleTechnicalIssues() {
+        // Implement your handling logic here
+        System.out.println("Technical issues resolved.");
+    }
+}
+
+package java_miniproject;
+import java.util.List;
+public class ApprovedRequests {
+    private List<OutpassRequest> approvedRequests;
+
+    public ApprovedRequests(List<OutpassRequest> approvedRequests) {
+        this.approvedRequests = approvedRequests;
+    }
+
+    // Add an approved outpass request to the list
+    public void addApprovedRequest(OutpassRequest request) {
+        approvedRequests.add(request);
+        System.out.println("Request approved and recorded.");
+    }
+
+    // Get a list of all approved requests
+    public List<OutpassRequest> getApprovedRequests() {
+        return approvedRequests;
+    }
+
+	public void add(OutpassRequest outpassRequest) {
+		
+		this.approvedRequests.add(outpassRequest);
+        System.out.println("Request from " + outpassRequest.getStudentName() + " approved and added to the list.");
+	}
+    
+
+}
+
+package java_miniproject;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DatabaseManagement {
+    private List<User> users = new ArrayList<>();
+    private List<OutpassRequest> outpassRequests = new ArrayList<>();
+
+    // Add a user to the user database
+    public void addUser(User user) {
+        users.add(user);
+        System.out.println("User added to the database: " + user.getUsername());
+    }
+
+    // Add an outpass request to the requests database
+    public void addOutpassRequest(OutpassRequest request) {
+        outpassRequests.add(request);
+        System.out.println("Outpass request added to the database.");
+    }
+
+    // Get a list of all users
+    public List<User> getAllUsers() {
+        return users;
+    }
+
+    // Get a list of all outpass requests
+    public List<OutpassRequest> getAllOutpassRequests() {
+        return outpassRequests;
+    }
+    
+    public OutpassRequest findOutpassRequestByStudentName(String studentName) {
+        for (OutpassRequest request : outpassRequests) {
+            if (request.getStudentName().equalsIgnoreCase(studentName)) {
+                return request;
+            }
+        }
+        return null;  // Return null if no matching request is found
+    }
+}
+
+package java_miniproject;
+import java.util.List;
+public class EmailNotifications {
+    
+    public void sendEmailToWarden(OutpassRequest request, List<String> wardenEmails) {
+        for (String wardenEmail : wardenEmails) {
+            String subject = "Outpass Request Notification";
+            String message = buildEmailMessage(request);
+
+            
+            sendEmail(wardenEmail, subject, message);
+        }
+    }
+
+    
+    private String buildEmailMessage(OutpassRequest request) {
+        StringBuilder message = new StringBuilder();
+        message.append("Student: ").append(request.getStudentName()).append("\n");
+        message.append("Leaving Date: ").append(request.getLeavingDate()).append("\n");
+        message.append("Returning Date: ").append(request.getReturningDate()).append("\n");
+        message.append("Time of Leaving: ").append(request.getTimeOfLeaving()).append("\n");
+        message.append("Reason: ").append(request.getReason()).append("\n");
+        return message.toString();
+    }
+
+    
+    private void sendEmail(String to, String subject, String message) {
+        
+        System.out.println("Email sent to " + to + " with subject: " + subject);
+    }
+
+}
+
+package java_miniproject;
+public class EmailVerification {
+  
+    public boolean verifySenderEmail(String senderEmail) {
+      
+        if (isValidEmail(senderEmail)) {
+            System.out.println("Email address verified: " + senderEmail);
+            return true;
+        }
+        System.out.println("Email address verification failed: " + senderEmail);
+        return false;
+    }
+
+    
+    private boolean isValidEmail(String email) {
+        
+        return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
+    }
+}
+
+package java_miniproject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class FileHandler {
+
+    // Method to store a list of OutpassRequest objects to a file
+    public static void storeOutpassRequestsToFile(List<OutpassRequest> outpassRequests, String filename) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (OutpassRequest request : outpassRequests) {
+                writer.write(request.toCSVLine());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    // Method to read OutpassRequest objects from a file
+    public static List<OutpassRequest> readOutpassRequestsFromFile(String filename) {
+        List<OutpassRequest> requests = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] attributes = line.split(",");
+                OutpassRequest request = new OutpassRequest(attributes[0], attributes[1], attributes[2], attributes[3], attributes[4], attributes[5]);
+                requests.add(request);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading from file: " + e.getMessage());
+        }
+        return requests;
+    }
+
+    public static void storeUsersToFile(Map<String, User> users, String filename) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (User user : users.values()) {
+                writer.write(user.toCSVLine());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    public static Map<String, User> readUsersFromFile(String filename) {
+        Map<String, User> users = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                User user = User.fromCSVLine(line);
+                users.put(user.getUsername(), user);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading from file: " + e.getMessage());
+        }
+        return users;
+    }
+}
+
+package java_miniproject;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+
+public class LogsAndReporting {
+    private String logFilePath;
+
+    public LogsAndReporting(String logFilePath) {
+        this.logFilePath = logFilePath;
+    }
+  
+    public void logAction(String action) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, true));
+            writer.write(action);
+            writer.newLine();
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("Error logging action: " + e.getMessage());
+        }
+    }
+
+    // Generate a report of outpass requests
+    public void generateOutpassRequestReport(List<OutpassRequest> requests) {
+        System.out.println("Outpass Requests Report:");
+        for (OutpassRequest request : requests) {
+            System.out.println("Student: " + request.getStudentName());
+            System.out.println("Leaving Date: " + request.getLeavingDate());
+            System.out.println("Returning Date: " + request.getReturningDate());
+            System.out.println("Time of Leaving: " + request.getTimeOfLeaving());
+            System.out.println("Reason: " + request.getReason());
+            System.out.println();
+        }
+    }
+}
+
+package java_miniproject;
+import java.util.Scanner;
+public class MobileAccessibility {
+    private Scanner scanner;
+
+    public MobileAccessibility() {
+        scanner = new Scanner(System.in);
+    }
+
+    // Check if the current user is accessing the system from a mobile device
+    public boolean isMobileDevice(String userAgent) {
+        // For better accuracy, consider using a library like UserAgentUtils
+        // Here's a basic check:
+        if (userAgent != null) {
+            String lowerCaseAgent = userAgent.toLowerCase();
+            if (lowerCaseAgent.contains("mobile") || lowerCaseAgent.contains("android") || lowerCaseAgent.contains("iphone")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Load a mobile-friendly version of the system interface
+    public void loadMobileInterface() {
+        // Implement code to load the mobile-friendly interface
+        System.out.println("Mobile interface loaded.");
+    }
+
+    public void checkAndLoadInterface() {
+        System.out.println("Please enter your user agent:");
+        String userAgent = scanner.nextLine();
+
+        if (isMobileDevice(userAgent)) {
+            loadMobileInterface();
+        } else {
+            System.out.println("Standard interface loaded.");
+        }
+    }
+
+    public static void main(String[] args) {
+        MobileAccessibility accessibility = new MobileAccessibility();
+        accessibility.checkAndLoadInterface();
+    }
+}
+
+package java_miniproject;
+public class OutpassRequest {
+	private String Status;
+    //private Status status = Status.PENDING;
+    //private java_miniproject.OutpassRequest.Status status;
+	private static final String APPROVED = null;
+	private static final String PENDING = null;
+	private static final String DENIED = null;
+	private String studentName;
+    private String leavingDate;
+    private String returningDate;
+    private String timeOfLeaving;
+    private String reason;
+
+    public OutpassRequest(String studentName, String leavingDate, String returningDate, String timeOfLeaving, String reason, String status) {
+        this.studentName = studentName;
+        this.leavingDate = leavingDate;
+        this.returningDate = returningDate;
+        this.timeOfLeaving = timeOfLeaving;
+        this.reason = reason;
+        this.Status = status;
+    }
+    
+    // Getters for request properties
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public String getLeavingDate() {
+        return leavingDate;
+    }
+
+    public String getReturningDate() {
+        return returningDate;
+    }
+
+    public String getTimeOfLeaving() {
+        return timeOfLeaving;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+    public String getStatus() {
+        return Status;
+        //private java_miniproject.OutpassRequest.Status status;
+    }
+    //public void approve() {
+        //this.status = Status.APPROVED;
+    //}
+
+    //public void deny() {
+        //this.status = Status.DENIED;
+    private OutpassRequest generatedOutpass = null;
+
+    public OutpassRequest getGeneratedOutpass() {
+        return this.generatedOutpass;
+    }
+
+    public String generateOutpass1() {
+        System.out.println("------- OUTPASS DETAILS -------");
+        System.out.println("Student Name: " + this.studentName);
+        System.out.println("Leaving Date: " + this.leavingDate);
+        System.out.println("Returning Date: " + this.returningDate);
+        System.out.println("Time of Leaving: " + this.timeOfLeaving);
+        System.out.println("Reason: " + this.reason);
+        System.out.println("--------------------------------");
+		return Status;
+        
+       
+    
+        
+    
+    }
+    
+    public void displayOutpassDetails() {
+        System.out.println("Outpass Details for: " + getStudentName());
+        System.out.println("Leaving Date: " + getLeavingDate());
+        System.out.println("Returning Date: " + getReturningDate());
+        System.out.println("Time of Leaving: " + getTimeOfLeaving());
+        System.out.println("Reason for Outpass: " + getReason());
+    }
+    
+    public String toCSVLine() {
+        return studentName + "," + leavingDate + "," + returningDate + "," + timeOfLeaving + "," + reason + "," + Status;
+    }
+
+}
+
+package java_miniproject;
+import java.util.Map;
+public class SecurityManagement {
+    private Map<String, String> userCredentials; // Store user credentials (username, password)
+    private Map<String, String> userRoles; // Store user roles (username, role)
+
+    public SecurityManagement(Map<String, String> userCredentials, Map<String, String> userRoles) {
+        this.userCredentials = userCredentials;
+        this.userRoles = userRoles;
+    }
+
+    // Authenticate a user based on provided credentials
+    public boolean authenticateUser(String username, String password) {
+        if (userCredentials.containsKey(username) && userCredentials.get(username).equals(password)) {
+            System.out.println("Authentication successful for user: " + username);
+            return true;
+        }
+        System.out.println("Authentication failed for user: " + username);
+        return false;
+    }
+
+    // Authorize a user based on their role
+    public boolean authorizeUser(String username, String requiredRole) {
+        if (userRoles.containsKey(username) && userRoles.get(username).equals(requiredRole)) {
+            System.out.println("Authorization granted for user: " + username);
+            return true;
+        }
+        System.out.println("Authorization denied for user: " + username);
+        return false;
+    }
+}
+
+package java_miniproject;
+//import java.util.List;
+
+public class StudentNotification {
+    // Send email notification to a student regarding the status of their outpass request
+    public void sendNotificationToStudent(String studentEmail, String status) {
+        String subject = "Outpass Request Status";
+        String message = buildNotificationMessage(status);
+
+        // Replace the following line with your email sending logic
+        sendEmail(studentEmail, subject, message);
+    }
+
+    // Build the email notification message
+    private String buildNotificationMessage(String status) {
+        return "Your outpass request status: " + status;
+    }
+
+    
+    private void sendEmail(String to, String subject, String message) {
+     
+        System.out.println("Email sent to " + to + " with subject: " + subject);
+    }
+}
+
+package java_miniproject;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+//import java.util.HashMap;
+//import java.util.Map;
+
+
+class User {
+    private String username;
+    private String password;
+    private String role; // Student or Parent
+
+    public User(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+    // Getters for user properties
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+	public void setPassword(String newPassword) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	// Method to store a list of User objects to a file
+	public static void storeUsersToFile(Map<String, User> users, String filename) {
+	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+	        for (User user : users.values()) {
+	            writer.write(user.toCSVLine());
+	            writer.newLine();
+	        }
+	    } catch (IOException e) {
+	        System.out.println("Error writing to file: " + e.getMessage());
+	    }
+	}
+
+	char[] toCSVLine() {
+		String csvLine = username + "," + password + "," + role;
+        return csvLine.toCharArray();
+		
+	}
+
+	// Method to read User objects from a file
+	public static Map<String, User> readUsersFromFile(String filename) {
+	    Map<String, User> users = new HashMap<>();
+
+	    try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+	        String line;
+	        while ((line = reader.readLine()) != null) {
+	            User user = User.fromCSVLine(line);
+	            users.put(user.getUsername(), user);
+	        }
+	    } catch (IOException e) {
+	        System.out.println("Error reading from file: " + e.getMessage());
+	    }
+
+	    return users;
+	}
+
+	static User fromCSVLine(String line) {
+		String[] parts = line.split(",");
+        if (parts.length < 3) {
+            
+            return null;
+        }
+        return new User(parts[0], parts[1], parts[2]);
+	}
+
+}
+
+package java_miniproject;
+import java.util.HashMap;
+import java.util.Map;
+
+public class UserRegistration {
+    private Map<String, User> userDatabase = new HashMap<>();
+
+    // Register a new user (student or parent)
+    public void registerUser(User user) {
+        if (!userDatabase.containsKey(user.getUsername())) {
+            userDatabase.put(user.getUsername(), user);
+            System.out.println("User registered successfully: " + user.getUsername());
+        } else {
+            System.out.println("User already exists: " + user.getUsername());
+        }
+    }
+
+    // Check if a user exists based on the username
+    public boolean userExists(String username) {
+        return userDatabase.containsKey(username);
+    }
+    
+    public Map<String, User> getAllUsers() {
+        return userDatabase;
+    }
+
+    // Removed the extraneous method
+}
+
+package java_miniproject;
+public class Warden {
+    //private String username;
+    //private String password;
+
+    final String WARDEN_USERNAME = "warden123";
+    final String WARDEN_PASSWORD = "wardenpass";
+    public Warden(String username, String password) {
+        //this.username = username;
+        //this.password = password;
+        
+    }
+
+    //public boolean authenticate(String inputUsername, String inputPassword) {
+        //return this.username.equals(inputUsername) && this.password.equals(inputPassword);
+    }
+
+package java_miniproject;
+import java.util.List;
+
+public class WardenApproval {
+    // Display a list of pending outpass requests for the warden to review
+    public void displayPendingRequests(List<OutpassRequest> pendingRequests) {
+        for (int i = 0; i < pendingRequests.size(); i++) {
+            System.out.println("Request " + (i + 1));
+            displayRequestDetails(pendingRequests.get(i));
+        }
+    }
+
+    // Display the details of an outpass request
+    public void displayRequestDetails(OutpassRequest request) {
+        System.out.println("Student: " + request.getStudentName());
+        System.out.println("Leaving Date: " + request.getLeavingDate());
+        System.out.println("Returning Date: " + request.getReturningDate());
+        System.out.println("Time of Leaving: " + request.getTimeOfLeaving());
+        System.out.println("Reason: " + request.getReason());
+    }
+    public class NotPendingException extends Exception {
+        public NotPendingException(String message) {
+            super(message);
+        }
+    // Approve an outpass request
+    public void approveRequest(OutpassRequest request) {
+        
+        System.out.println("Request approved.");
+    }
+
+    // Deny an outpass request
+    public void denyRequest(OutpassRequest request) {
+        
+        System.out.println("Request denied.");
+    }
+}
+}
+
+Main.java
+
+package java_miniproject;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.*;
+
+public class Main {
+
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to the Outpass System!");
+        //List<OutpassRequest> approvedRequestList = new ArrayList<>();	
+        //ApprovedRequests approvedRequestsManager = new ApprovedRequests(approvedRequestList);
+        
+        List<OutpassRequest> approvedRequestList = FileHandler.readOutpassRequestsFromFile("approvedOutpassRequests.txt");
+        ApprovedRequests approvedRequestsManager = new ApprovedRequests(approvedRequestList);
+
+        DatabaseManagement databaseManagement = new DatabaseManagement();
+        UserRegistration userRegistration = new UserRegistration();
+        AdminPanel adminPanel = new AdminPanel();
+        WardenApproval wardenApproval = new WardenApproval();
+        ApprovedRequests approvedRequests = new ApprovedRequests(new ArrayList<>());
+
+        while (true) {
+            System.out.println("\nPlease choose an option:");
+            System.out.println("1. Register User");
+            System.out.println("2. Submit Outpass Request");
+            System.out.println("3. Display Registered Users (Admin)");
+            System.out.println("4. Warden User");
+            System.out.println("5.View Outpass");
+            System.out.println("6. Exit");
+            System.out.println("7. Save Data");
+            System.out.print("Enter choice: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // consume the newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter username: ");
+                    String username = scanner.nextLine();
+
+                    System.out.print("Enter password: ");
+                    String password = scanner.nextLine();
+
+                    System.out.print("Enter role (Student/Parent): ");
+                    String role = scanner.nextLine();
+
+                    User user = new User(username, password, role);
+                    userRegistration.registerUser(user);
+                    Map<String, User> registeredUsers = userRegistration.getAllUsers();
+                    FileHandler.storeUsersToFile(registeredUsers, "registeredUsers.txt");
+                    break;
+
+                case 2:
+                    System.out.print("Enter student's name: ");
+                    String studentName = scanner.nextLine();
+
+                    System.out.print("Enter leaving date (YYYY-MM-DD): ");
+                    String leavingDate = scanner.nextLine();
+
+                    System.out.print("Enter returning date (YYYY-MM-DD): ");
+                    String returningDate = scanner.nextLine();
+
+                    System.out.print("Enter time of leaving (HH:MM AM/PM): ");
+                    String timeOfLeaving = scanner.nextLine();
+
+                    System.out.print("Enter reason for outpass: ");
+                    String reason = scanner.nextLine();
+                    
+                    String status="pending";
+
+                    OutpassRequest outpassRequest = new OutpassRequest(studentName, leavingDate, returningDate, timeOfLeaving, reason, status);
+                    databaseManagement.addOutpassRequest(outpassRequest);
+
+                    System.out.println("Outpass request submitted successfully.");
+                    
+                    
+                    String outpass = outpassRequest.generateOutpass1();
+                    System.out.println(outpass);
+                    System.out.println("Outpass request submitted successfully.");
+                    break;
+
+
+                case 3:
+                    Map<String, User> registeredUsers1 = userRegistration.getAllUsers();
+                    if (registeredUsers1.isEmpty()) {
+                        System.out.println("No users are registered yet.");
+                    } else {
+                        adminPanel.displayRegisteredUsers(registeredUsers1);
+                    }
+                    break;
+                    //Map<String, User> registerUser = UserRegistration.getAllUsers();
+                    //adminPanel.displayRegisteredUsers(registerUser);
+                    //break;
+
+                case 4:
+                	
+                    final String WARDEN_USERNAME = "warden123";
+                    final String WARDEN_PASSWORD = "wardenpass";
+
+                    System.out.println("Enter Warden Username: ");
+                    String username1 = scanner.next();
+
+                    System.out.print("Enter Warden Password: ");
+                    String password1 = scanner.next();
+
+                    if (username1.equals(WARDEN_USERNAME) && password1.equals(WARDEN_PASSWORD)) {
+                        // Authenticate warden and show pending requests
+                        List<OutpassRequest> pendingRequests = databaseManagement.getAllOutpassRequests(); // Assuming you filter out approved ones.
+
+                        if (pendingRequests.isEmpty()) {
+                            System.out.println("No pending requests.");
+                            break;
+                        }
+
+                        for (int i = 0; i < pendingRequests.size(); i++) {
+                            OutpassRequest request = pendingRequests.get(i);
+                            System.out.println("Request " + (i + 1) + ": " + request.getStudentName());
+                        }
+
+                        System.out.print("Enter request number to approve (or type 'deny' followed by the request number to deny): for eg. deny 1");
+                        String action = scanner.next();
+
+                        int index;  // this will store the selected index
+
+                        if (action.equalsIgnoreCase("deny")) {
+                            index = scanner.nextInt() - 1;
+                            if (index >= 0 && index < pendingRequests.size()) {
+                                System.out.println("Request from " + pendingRequests.get(index).getStudentName() + " denied.");
+                            } else {
+                                System.out.println("Invalid request number.");
+                            }
+                        } else {
+                            try {
+                                index = Integer.parseInt(action) - 1;
+                                if (index >= 0 && index < pendingRequests.size()) {
+                                    approvedRequests.add(pendingRequests.get(index));
+                                    System.out.println("Request from " + pendingRequests.get(index).getStudentName() + " approved.");
+                                } else {
+                                    System.out.println("Invalid request number.");
+                                }
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input format.");
+                            }
+                        }
+                    } else {
+                        System.out.println("Incorrect Warden credentials!");
+                    }
+                    break;
+
+                
+                case 5:
+                    System.out.println("Enter the student's name to view the outpass details:");
+                    String studentNameToView = scanner.nextLine();
+
+                    OutpassRequest outpassToView = databaseManagement.findOutpassRequestByStudentName(studentNameToView);
+                    if (outpassToView != null) {
+                        outpassToView.displayOutpassDetails();
+                    } else {
+                        System.out.println("No outpass request found for this student.");
+                    }
+                    break;
+                    
+                case 6:
+                	Map<String, User> allRegisteredUsers = userRegistration.getAllUsers();
+                	FileHandler.storeUsersToFile(allRegisteredUsers, "registeredUsers.txt");
+                    System.out.println("Exiting system.");
+                    System.exit(0);
+                    
+                case 7:
+                    FileHandler.storeOutpassRequestsToFile(approvedRequestList, "approvedOutpassRequests.txt");
+                    System.out.println("Data saved successfully.");
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
+
+The result is a functional system that enables users to interact with the application, register, submit outpass requests, and view user details, while Wardens can approve or deny requests. The system also allows for data to be saved and loaded, facilitating efficient management of user data and approved outpass requests.
